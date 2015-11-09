@@ -1,0 +1,25 @@
+{
+  "name": "wikitext-helper",
+  "version": "0.0.1",
+  "description": "A collection of wikitext helper functions, especially datastructure to wikitext",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fannon/wikitext-helper.git"
+  },
+  "keywords": [
+    "wikitext",
+    "mediawiki",
+    "converter",
+    "helper"
+  ],
+  "author": "Simon Heimler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Fannon/wikitext-helper/issues"
+  },
+  "homepage": "https://github.com/Fannon/wikitext-helper#readme"
+}
