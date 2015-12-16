@@ -166,9 +166,7 @@ exports.function = function(name, params) {
  */
 exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
     'use strict';
-
-    const wikitext = exports.res['wikitext-js'];
-
+    
     let params = {};
 
     if (nameMap && typeof nameMap === 'object') {
