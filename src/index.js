@@ -166,7 +166,7 @@ exports.function = function(name, params) {
  */
 exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
     'use strict';
-    
+
     let params = {};
 
     if (nameMap && typeof nameMap === 'object') {
