@@ -1,9 +1,11 @@
 'use strict';
+/* global describe, it */
 
 const wikitext = require('../src/');
 const expect = require('chai').expect;
 
 describe('wikitext helper', function() {
+    'use strict';
 
 
     it('converts function objects', function() {
@@ -32,23 +34,29 @@ describe('wikitext helper', function() {
 
     it('converts object collections to wikitext', function() {
 
-        //let objCollection = [
-        //    '==Some Header==',
-        //    {
-        //        template: 'Country',
-        //
-        //    }
-        //];
-        //let obj = {
-        //    test: 'this',
-        //    that: true
-        //};
-        //let result = wikitext.objToFunction('set', obj);
-        //expect(result).to.be.a('string');
-        //expect(result).to.include('{{set:\n');
-        //expect(result).to.include('|test=this\n');
-        //expect(result).to.include('|that\n');
-        //console.log(result);
+        let collection = [
+            '==Some Header==',
+            {
+                template: 'Country',
+                params: {
+                    code: 'en',
+                    label_en: 'England'
+                }
+            },
+            {
+                function: '#set',
+                params: {
+                    test: 'this',
+                    that: true
+                }
+            }
+        ];
+
+        let result = wikitext.convert(collection);
+        expect(result).to.be.a('string');
+        expect(result).to.include('==Some Header==');
+        expect(result).to.include('|test=this\n');
+        expect(result).to.include('|that\n');
     });
 
 

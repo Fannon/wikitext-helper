@@ -12,8 +12,13 @@ exports.settings = {
 // GETTER / SETTER                      //
 //////////////////////////////////////////
 
-exports.setSettings = function(settings) {
-    exports.settings = settings;
+exports.setSettings = function(customSettings) {
+    'use strict';
+    customSettings = customSettings || {};
+    for (let settingName in customSettings) {
+        exports.settings[settingName] = customSettings[settingName];
+    }
+    return exports.settings;
 };
 
 
@@ -29,40 +34,40 @@ exports.setSettings = function(settings) {
  * var example = [
  * '==Pure Wikitext==',
  * {
- *     name: 'Person',
- *     template: {
+ *     template: 'Person',
+ *     params: {
  *        email: 'rosalind.chan@optique.biz',
  *        phone: '+1 (864) 421-2744'
  *     }
  * },
  * {
- *     name: '#set',
- *     function: {
+ *     function: '#set',
+ *     params: {
  *         var1: 1,
  *         var2: 'zwei'
  *     }
  * }];
  *
- * @param objCollection
+ * @param {array} collection
+ *
  * @returns {string}
  */
-exports.arrayToWikitext = function(objCollection) {
+exports.convert = function(collection) {
     'use strict';
 
     var wikitext = '';
 
-    for (let entry of objCollection) {
+    for (let entry of collection) {
 
-        var obj = objCollection[i];
+        if (typeof entry === 'string') {
+            wikitext += entry + '\n';
+        } else if (typeof entry === 'object') {
 
-        if (typeof obj === 'string') {
-            wikitext += obj + '\n';
-        } else if (typeof obj === 'object' && obj.function) {
-            wikitext += exports.objToFunction(obj.name, obj.function);
-        } else if (typeof obj === 'object') {
-            // If no data is given, asume it's an empty template
-            var template = obj.template || {};
-            wikitext += exports.objToTemplate(obj.name, template);
+            if (entry.function) {
+                wikitext += exports.function(entry.function, entry.params || {});
+            } else if (entry.template) {
+                wikitext += exports.template(entry.template, entry.params || {});
+            }
         }
     }
 
@@ -74,21 +79,21 @@ exports.arrayToWikitext = function(objCollection) {
  * Converts an object to a wikitext template
  *
  * @param {string}      name    name of the template
- * @param {object}      obj
+ * @param {object}      params
  *
  * @returns {string}    wikitext
  */
-exports.template = function(name, obj) {
+exports.template = function(name, params) {
     'use strict';
 
-    if (!obj || Object.keys(obj).length === 0) {
+    if (!params || Object.keys(params).length === 0) {
         return '{{' + name + '}}\n'; // No unnecessary linebreaks
     }
 
     var wikitext = '{{' + name + '\n';
 
-    for (var propertyName in obj) {
-        var property = obj[propertyName];
+    for (var propertyName in params) {
+        var property = params[propertyName];
 
         if (property && typeof property === 'object' && !(property instanceof Array)) {
             // Handle Objects
@@ -123,19 +128,19 @@ exports.template = function(name, obj) {
  * Converts an object to a MediaWiki parser function call
  *
  * @param {string}      name    name of the function
- * @param {object}      obj
+ * @param {object}      params
  *
  * @returns {string}    wikitext
  */
-exports.function = function(name, obj) {
+exports.function = function(name, params) {
 
     var wikitext = '{{' + name + ':\n';
 
-    for (var propertyName in obj) {
+    for (var propertyName in params) {
 
-        var prop = obj[propertyName];
+        var prop = params[propertyName];
 
-        if (prop && typeof prop === 'object' && !(obj instanceof Array)) {
+        if (prop && typeof prop === 'object' && !(params instanceof Array)) {
             console.error('[W] importHelper.objToFunction() cannot convert objects to function parameters!');
         } else if (prop === true) {
             wikitext += '|' + propertyName + '\n';
@@ -171,19 +176,4 @@ exports.escape = function(wikitext) {
         ;
     }
     return wikitext;
-};
-
-exports.findInCollection = function(collection, name) {
-
-    var results = [];
-
-    for (var i = 0; i < collection.length; i++) {
-        var obj = collection[i];
-        if (obj.name && obj.name === name) {
-            results.push(obj);
-        }
-    }
-
-    return results;
-
 };
