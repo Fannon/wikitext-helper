@@ -1,11 +1,11 @@
 {
-  "name": "wikitext-helper",
-  "version": "0.0.1",
+  "name": "wikitext-js",
+  "version": "0.1.1",
   "description": "A collection of wikitext helper functions, especially datastructure to wikitext",
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Fannon/wikitext-helper.git"
+    "url": "git+https://github.com/Fannon/wikitext-js.git"
   },
   "devDependencies": {
     "chai": "^3.4.1",
@@ -32,7 +32,7 @@
   "author": "Simon Heimler",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Fannon/wikitext-helper/issues"
+    "url": "https://github.com/Fannon/wikitext-js/issues"
   },
-  "homepage": "https://github.com/Fannon/wikitext-helper#readme"
+  "homepage": "https://github.com/Fannon/wikitext-js#readme"
 }
