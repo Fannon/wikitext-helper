@@ -156,6 +156,39 @@ exports.function = function(name, params) {
     return wikitext;
 };
 
+/**
+ * This converts a SPARQL JSON Result row (response.results.bindings) to a template
+ * @param templateName
+ * @param row
+ * @param [nameMap]
+ *
+ * @returns {string}
+ */
+exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
+    'use strict';
+
+    const wikitext = exports.res['wikitext-js'];
+
+    let params = {};
+
+    if (nameMap && typeof nameMap === 'object') {
+        for (let paramName in nameMap) {
+            let paramLabel = nameMap[paramName];
+            if (row[paramName] && row[paramName].value) {
+                params[paramLabel] = row[paramName].value
+            }
+        }
+    } else {
+        for (let paramName in row) {
+            if (row[paramName].value) {
+                params[paramName] = row[paramName].value
+            }
+        }
+    }
+
+    return exports.template(templateName, params);
+};
+
 //////////////////////////////////////////
 // HELPER                               //
 //////////////////////////////////////////
