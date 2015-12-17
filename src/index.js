@@ -67,18 +67,25 @@ exports.params = function(obj, lineBreak) {
  *
  * @returns {string}    wikitext
  */
-exports.template = function(name, params) {
+exports.template = function(name, params, lineBreak) {
     'use strict';
 
-    if (!params || Object.keys(params).length === 0) {
-        return '{{' + name + '}}\n';
+    if (lineBreak !== false) {
+        lineBreak = true;
     }
 
-    let wikitext = '{{' + name + '\n';
+    let LB = '';
+    if (lineBreak) { LB = '\n'; }
 
-    wikitext += exports.params(params, true);
+    if (!params || Object.keys(params).length === 0) {
+        return '{{' + name + '}}' + LB;
+    }
 
-    wikitext += '}}\n';
+    let wikitext = '{{' + name + LB;
+
+    wikitext += exports.params(params, lineBreak);
+
+    wikitext += '}}' + LB;
 
     return wikitext;
 };
@@ -91,20 +98,23 @@ exports.template = function(name, params) {
  *
  * @returns {string}    wikitext
  */
-exports.function = function(name, params, mainParam) {
+exports.function = function(name, params, mainParam, lineBreak) {
     'use strict';
 
     mainParam = mainParam || '';
 
+    let LB = '';
+    if (lineBreak) { LB = '\n'; }
+
     if (!params && mainParam) {
-        return '{{' + name + ':' + mainParam + '}}\n';
+        return '{{' + name + ':' + mainParam + '}}' + LB;
     }
 
-    let wikitext = '{{' + name + ':' + mainParam + '\n';
+    let wikitext = '{{' + name + ':' + mainParam + LB;
 
-    wikitext += exports.params(params, true);
+    wikitext += exports.params(params, lineBreak);
 
-    wikitext += '}}\n';
+    wikitext += '}}' + LB;
 
     return wikitext;
 };
