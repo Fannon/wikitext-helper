@@ -21,17 +21,100 @@ exports.setSettings = function(customSettings) {
     return exports.settings;
 };
 
+//////////////////////////////////////////
+// BASIC FUNCTIONS                      //
+//////////////////////////////////////////
+
+exports.params = function(obj, lineBreak) {
+    'use strict';
+
+    let LB = '';
+    let wikitext = '';
+
+    if (lineBreak) {
+        LB = '\n';
+    }
+
+    if (obj && typeof obj === 'object') {
+        for (let paramKey in obj) {
+            let paramValue = obj[paramKey];
+            if (typeof paramValue === 'string' || paramValue instanceof String) {
+                wikitext += '|' + paramKey + '=' + this.escape(paramValue) + LB;
+            } else if (Array.isArray(paramValue)) {
+                paramValue.map((value) => {
+                    return exports.escape(value);
+                });
+                wikitext += '|' + paramKey + '=' + paramValue.join(exports.settings.arraymapSeparator) + LB;
+            } else {
+                wikitext += '|' + paramKey + LB;
+            }
+        }
+    }
+
+    return wikitext;
+};
+
 
 //////////////////////////////////////////
 // FUNCTIONS                            //
 //////////////////////////////////////////
 
 /**
+ * Converts an object to a wikitext template
+ *
+ * @param {string}      name    name of the template
+ * @param {object}      params
+ *
+ * @returns {string}    wikitext
+ */
+exports.template = function(name, params) {
+    'use strict';
+
+    if (!params || Object.keys(params).length === 0) {
+        return '{{' + name + '}}\n';
+    }
+
+    let wikitext = '{{' + name + '\n';
+
+    wikitext += exports.params(params, true);
+
+    wikitext += '}}\n';
+
+    return wikitext;
+};
+
+/**
+ * Converts an object to a MediaWiki parser function call
+ *
+ * @param {string}      name    name of the function
+ * @param {object}      params
+ *
+ * @returns {string}    wikitext
+ */
+exports.function = function(name, params, mainParam) {
+    'use strict';
+
+    mainParam = mainParam || '';
+
+    if (!params && mainParam) {
+        return '{{' + name + ':' + mainParam + '}}\n';
+    }
+
+    let wikitext = '{{' + name + ':' + mainParam + '\n';
+
+    wikitext += exports.params(params, true);
+
+    wikitext += '}}\n';
+
+    return wikitext;
+};
+
+/**
  * Converts a collection of wikitext, templates and function calls to a combined wikitext document
  * See the example object for the objCollection object structure
  *
  * @example
- * var example = [
+ * let example = [
  * '==Pure Wikitext==',
  * {
  *     template: 'Person',
@@ -43,8 +126,8 @@ exports.setSettings = function(customSettings) {
  * {
  *     function: '#set',
  *     params: {
- *         var1: 1,
- *         var2: 'zwei'
+ *         let1: 1,
+ *         let2: 'zwei'
  *     }
  * }];
  *
@@ -55,7 +138,7 @@ exports.setSettings = function(customSettings) {
 exports.convert = function(collection) {
     'use strict';
 
-    var wikitext = '';
+    let wikitext = '';
 
     for (let entry of collection) {
 
@@ -75,86 +158,11 @@ exports.convert = function(collection) {
 };
 
 
-/**
- * Converts an object to a wikitext template
- *
- * @param {string}      name    name of the template
- * @param {object}      params
- *
- * @returns {string}    wikitext
- */
-exports.template = function(name, params) {
-    'use strict';
 
-    if (!params || Object.keys(params).length === 0) {
-        return '{{' + name + '}}\n'; // No unnecessary linebreaks
-    }
+//////////////////////////////////////////
+// SPECIAL FUNCTIONS                    //
+//////////////////////////////////////////
 
-    var wikitext = '{{' + name + '\n';
-
-    for (var propertyName in params) {
-        var property = params[propertyName];
-
-        if (property && typeof property === 'object' && !(property instanceof Array)) {
-            // Handle Objects
-            console.log('[W] importHelper.objToTemplate() cannot convert objects to template values!');
-        } else if (property === null) {
-            // Handle properties without value
-            wikitext += '|' + propertyName + '\n';
-        } else if (Array.isArray(property)) {
-            // Handle Arrays
-            property = exports.escape(property);
-            wikitext += '|' + propertyName + '=' + property.join(exports.settings.arraymapSeparator + ' ') + '\n';
-        } else if (property instanceof Boolean) {
-            // Handle Booleans
-            // TODO: This needs to be adjustable/localizable
-            if (property === true) {
-                property = 'Yes';
-            } else {
-                property = 'No';
-            }
-            wikitext += '|' + propertyName + '=' + exports.escape(property) + '\n';
-        } else {
-            wikitext += '|' + propertyName + '=' + exports.escape(property) + '\n';
-        }
-    }
-
-    wikitext += '}}\n';
-
-    return wikitext;
-};
-
-/**
- * Converts an object to a MediaWiki parser function call
- *
- * @param {string}      name    name of the function
- * @param {object}      params
- *
- * @returns {string}    wikitext
- */
-exports.function = function(name, params) {
-
-    var wikitext = '{{' + name + ':\n';
-
-    for (var propertyName in params) {
-
-        var prop = params[propertyName];
-
-        if (prop && typeof prop === 'object' && !(params instanceof Array)) {
-            console.error('[W] importHelper.objToFunction() cannot convert objects to function parameters!');
-        } else if (prop === true) {
-            wikitext += '|' + propertyName + '\n';
-        } else if (Array.isArray(prop)) {
-            wikitext += '|' + propertyName + '=' + prop.join(exports.settings.arraymapSeparator) + '\n';
-        } else {
-            wikitext += '|' + propertyName + '=' + prop.toString().trim() + '\n';
-        }
-    }
-
-    wikitext += '}}\n';
-
-    return wikitext;
-};
 
 /**
  * This converts a SPARQL JSON Result row (response.results.bindings) to a template
@@ -167,19 +175,23 @@ exports.function = function(name, params) {
 exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
     'use strict';
 
+    if (!templateName || !row) {
+        return '';
+    }
+
     let params = {};
 
     if (nameMap && typeof nameMap === 'object') {
         for (let paramName in nameMap) {
             let paramLabel = nameMap[paramName];
             if (row[paramName] && row[paramName].value) {
-                params[paramLabel] = row[paramName].value
+                params[paramLabel] = row[paramName].value;
             }
         }
     } else {
         for (let paramName in row) {
             if (row[paramName].value) {
-                params[paramName] = row[paramName].value
+                params[paramName] = row[paramName].value;
             }
         }
     }
@@ -199,6 +211,8 @@ exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
  * @returns {string}
  */
 exports.escape = function(wikitext) {
+    'use strict';
+
     if (wikitext && wikitext.split) {
         wikitext = wikitext
             .split('|').join('&#124;')

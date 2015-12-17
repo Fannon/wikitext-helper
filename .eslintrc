@@ -5,7 +5,7 @@ rules:
     - 2
     - 4
   quotes:
-    - 2
+    - 1
     - single
   semi:
     - 2
