@@ -8,19 +8,19 @@ describe('wikitext-js special function', function() {
     'use strict';
 
     const mockSparqlRow = {
-        "c": {
-            "type": "uri",
-            "value": "http://www.wikidata.org/entity/Q238"
+        'c': {
+            'type': 'uri',
+            'value': 'http://www.wikidata.org/entity/Q238'
         },
-        "label_de": {
-            "xml:lang": "de",
-            "type": "literal",
-            "value": "San Marino"
+        'label_de': {
+            'xml:lang': 'de',
+            'type': 'literal',
+            'value': 'San Marino'
         },
-        "label_en": {
-            "xml:lang": "en",
-            "type": "literal",
-            "value": "San Marino"
+        'label_en': {
+            'xml:lang': 'en',
+            'type': 'literal',
+            'value': 'San Marino'
         }
     };
 
