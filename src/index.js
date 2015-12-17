@@ -28,30 +28,33 @@ exports.setSettings = function(customSettings) {
 exports.params = function(obj, lineBreak) {
     'use strict';
 
-    let LB = '';
-    let wikitext = '';
+    let LB = ' ';
+    let indent = '';
+    let result = '';
 
     if (lineBreak) {
         LB = '\n';
+        indent = '  ';
     }
 
     if (obj && typeof obj === 'object') {
         for (let paramKey in obj) {
             let paramValue = obj[paramKey];
+
             if (typeof paramValue === 'string' || paramValue instanceof String) {
-                wikitext += '|' + paramKey + '=' + this.escape(paramValue) + LB;
+                result += indent + '| ' + paramKey + '=' + this.escape(paramValue) + LB;
             } else if (Array.isArray(paramValue)) {
                 paramValue.map((value) => {
                     return exports.escape(value);
                 });
-                wikitext += '|' + paramKey + '=' + paramValue.join(exports.settings.arraymapSeparator) + LB;
+                result += indent + '| ' + paramKey + '=' + paramValue.join(exports.settings.arraymapSeparator) + LB;
             } else {
-                wikitext += '|' + paramKey + LB;
+                result += indent + '| ' + paramKey + LB;
             }
         }
     }
 
-    return wikitext;
+    return result;
 };
 
 
