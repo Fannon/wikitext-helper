@@ -61,6 +61,16 @@ module.exports = function(grunt) {
                     format: 'md',
                     destination: 'doc'
                 }
+            },
+            html: {
+                files: [{
+                    'expand': true,
+                    'cwd': 'src',
+                    'src': ['**/*.js']
+                }],
+                options: {
+                    destination: 'docs'
+                }
             }
         },
         release: {
