@@ -50,6 +50,19 @@ module.exports = function(grunt) {
                 }
             }
         },
+        documentation: {
+            md: {
+                files: [{
+                    'expand': true,
+                    'cwd': 'src',
+                    'src': ['index.js']
+                }],
+                options: {
+                    format: 'md',
+                    destination: 'doc'
+                }
+            }
+        },
         release: {
             options: {
 
@@ -61,8 +74,8 @@ module.exports = function(grunt) {
     grunt.registerTask('lint', ['eslint', 'jscs']);
     grunt.registerTask('test', ['mochacli']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
-    grunt.registerTask('default', ['lint', 'coverage']);
     grunt.registerTask('publish', ['release']);
+    grunt.registerTask('default', ['lint', 'coverage', 'documentation']);
 
     grunt.event.on('coverage', function(content, done) {
         done();
