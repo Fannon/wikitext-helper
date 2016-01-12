@@ -188,19 +188,31 @@ exports.convert = function(collection) {
 exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
     'use strict';
 
+    if (!row || !templateName) {
+        return '';
+    }
+
     let obj = exports.sparqlRowToObj(row, nameMap);
 
     return exports.template(templateName, obj);
 };
 
+/**
+ * This converts a SPARQL JSON Result row (response.results.bindings) to an object
+ *
+ * @param row
+ * @param [nameMap]
+ *
+ * @returns {string}
+ */
 exports.sparqlRowToObj = function(row, nameMap) {
     'use strict';
 
-    let obj = {};
-
-    if (!templateName || !row) {
-        return obj;
+    if (!row) {
+        return {};
     }
+
+    let obj = {};
 
     if (nameMap && typeof nameMap === 'object') {
         for (let paramName in nameMap) {
