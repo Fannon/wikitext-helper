@@ -188,28 +188,36 @@ exports.convert = function(collection) {
 exports.sparqlRowToTemplate = function(templateName, row, nameMap) {
     'use strict';
 
-    if (!templateName || !row) {
-        return '';
-    }
+    let obj = exports.sparqlRowToObj(row, nameMap);
 
-    let params = {};
+    return exports.template(templateName, obj);
+};
+
+exports.sparqlRowToObj = function(row, nameMap) {
+    'use strict';
+
+    let obj = {};
+
+    if (!templateName || !row) {
+        return obj;
+    }
 
     if (nameMap && typeof nameMap === 'object') {
         for (let paramName in nameMap) {
             let paramLabel = nameMap[paramName];
             if (row[paramName] && row[paramName].value) {
-                params[paramLabel] = row[paramName].value;
+                obj[paramLabel] = row[paramName].value;
             }
         }
     } else {
         for (let paramName in row) {
             if (row[paramName].value) {
-                params[paramName] = row[paramName].value;
+                obj[paramName] = row[paramName].value;
             }
         }
     }
 
-    return exports.template(templateName, params);
+    return obj;
 };
 
 //////////////////////////////////////////
