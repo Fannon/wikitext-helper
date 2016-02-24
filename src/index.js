@@ -4,7 +4,9 @@
 
 /** Default settings */
 exports.settings = {
-    arraymapSeparator: ';'
+    arraymapSeparator: ';',
+    wikitextIndent: '',
+    wikitextLinebreak: '\n'
 };
 
 
@@ -25,31 +27,42 @@ exports.setSettings = function(customSettings) {
 // BASIC FUNCTIONS                      //
 //////////////////////////////////////////
 
-exports.params = function(obj, lineBreak) {
+exports.params = function(obj, lineBreak, noEscape) {
     'use strict';
 
-    let LB = ' ';
-    let indent = '';
     let result = '';
 
+    let LB = '';
+    let indent = '';
+
     if (lineBreak) {
-        LB = '\n';
-        indent = '  ';
+        LB = exports.settings.wikitextLinebreak;
+        indent = exports.settings.wikitextIndent;
     }
 
     if (obj && typeof obj === 'object') {
         for (let paramKey in obj) {
             let paramValue = obj[paramKey];
 
-            if (typeof paramValue === 'string' || paramValue instanceof String) {
-                result += indent + '| ' + paramKey + '=' + this.escape(paramValue) + LB;
-            } else if (Array.isArray(paramValue)) {
-                paramValue.map((value) => {
-                    return exports.escape(value);
-                });
-                result += indent + '| ' + paramKey + '=' + paramValue.join(exports.settings.arraymapSeparator) + LB;
-            } else {
-                result += indent + '| ' + paramKey + LB;
+            if (paramValue !== undefined && paramValue !== null && paramValue !== '') {
+                if (typeof paramValue === 'string' || paramValue instanceof String) {
+                    let val = this.escape(paramValue);
+                    if (noEscape) {
+                        val = paramValue;
+                    }
+                    result += indent + '|' + paramKey + '=' + val + LB;
+                } else if (Array.isArray(paramValue)) {
+                    paramValue.map((value) => {
+                        if (noEscape) {
+                            return value;
+                        } else {
+                            return exports.escape(value);
+                        }
+                    });
+                    result += indent + '|' + paramKey + '=' + paramValue.join(exports.settings.arraymapSeparator) + LB;
+                } else {
+                    result += indent + '|' + paramKey + LB;
+                }
             }
         }
     }
@@ -70,15 +83,13 @@ exports.params = function(obj, lineBreak) {
  *
  * @returns {string}    wikitext
  */
-exports.template = function(name, params, lineBreak) {
+exports.template = function(name, params, lineBreak, noEscape) {
     'use strict';
 
-    if (lineBreak !== false) {
-        lineBreak = true;
-    }
-
     let LB = '';
-    if (lineBreak) { LB = '\n'; }
+    if (lineBreak) {
+        LB = exports.settings.wikitextLinebreak;
+    }
 
     if (!params || Object.keys(params).length === 0) {
         return '{{' + name + '}}' + LB;
@@ -86,7 +97,7 @@ exports.template = function(name, params, lineBreak) {
 
     let wikitext = '{{' + name + LB;
 
-    wikitext += exports.params(params, lineBreak);
+    wikitext += exports.params(params, lineBreak, noEscape);
 
     wikitext += '}}' + LB;
 
@@ -95,19 +106,22 @@ exports.template = function(name, params, lineBreak) {
 
 /**
  * Converts an object to a MediaWiki parser function call
+ * TODO: Make first param always mainParam?
  *
  * @param {string}      name    name of the function
  * @param {object}      params
  *
  * @returns {string}    wikitext
  */
-exports.function = function(name, params, mainParam, lineBreak) {
+exports.function = function(name, params, mainParam, lineBreak, noEscape) {
     'use strict';
 
     mainParam = mainParam || '';
 
     let LB = '';
-    if (lineBreak) { LB = '\n'; }
+    if (lineBreak) {
+        LB = exports.settings.wikitextLinebreak;
+    }
 
     if (!params && mainParam) {
         return '{{' + name + ':' + mainParam + '}}' + LB;
@@ -115,11 +129,101 @@ exports.function = function(name, params, mainParam, lineBreak) {
 
     let wikitext = '{{' + name + ':' + mainParam + LB;
 
-    wikitext += exports.params(params, lineBreak);
+    wikitext += exports.params(params, lineBreak, noEscape);
 
     wikitext += '}}' + LB;
 
     return wikitext;
+};
+
+/**
+ * Very simple and naive wikitext to data structure parser
+ * Does only detect templates and arbitrary wikitext
+ * No functions, no nesting!
+ *
+ * TODO: Rewrite this using a true parser, e.g. https://github.com/pegjs/pegjs
+ *
+ * @param wikitext
+ * @returns {{}}
+ */
+exports.wikitextToCollection = function(wikitext) {
+    'use strict';
+
+    let collection = [];
+
+    while (wikitext.indexOf('{{') > -1) {
+
+        let templateStart = wikitext.indexOf('{{');
+        let templateEnd = wikitext.indexOf('}}');
+
+        // Add arbitrary wikitext before the template
+        let preWikitext = wikitext.slice(0, templateStart).trim();
+        if (preWikitext !== '') {
+            collection.push(preWikitext);
+        }
+
+        // Add the detected Template
+        collection.push({
+            text: wikitext.slice(templateStart + 2, templateEnd)
+        });
+
+        // Remove already parsed wikitext
+        wikitext = wikitext.slice(templateEnd + 2);
+    }
+
+    if (wikitext.trim() !== '') {
+        collection.push(wikitext);
+    }
+
+    // Analyze Templates
+    for (let el of collection) {
+
+        if (el.text && el.text.indexOf('|') > -1) {
+
+            let templateText = el.text;
+
+            let paramStart = templateText.indexOf('|') || templateText.length;
+
+            // Template name
+            let name = templateText.slice(0, paramStart).trim();
+
+            if (name.charAt(0) === '#') {
+                el.function = name.slice(1);
+            } else {
+                el.template = name;
+            }
+
+            el.params = {};
+
+            templateText = templateText.slice(paramStart + 1);
+
+            // Look for parameters
+            while (templateText && templateText.indexOf('|') > -1) {
+                paramStart = templateText.indexOf('|');
+                let paramText = templateText.slice(0, paramStart).trim();
+                let paramArray = paramText.split('=');
+                let paramName = paramArray[0].trim();
+                let paramValue = paramArray[1].trim();
+                el.params[paramName] = paramValue;
+                templateText = templateText.slice(paramStart + 1);
+            }
+
+            // Don't forget the last parameter (there's no | to define its ending)
+            let paramText = templateText.trim();
+            let paramArray = paramText.split('=');
+            let paramName = paramArray[0].trim();
+            let paramValue = paramArray[1].trim();
+            el.params[paramName] = paramValue;
+
+            delete el.text;
+        } else if (el.text) {
+            // Template without parameters
+            el.template = el.text.trim();
+            el.params = {};
+        }
+    }
+
+    return collection;
 };
 
 /**
@@ -148,7 +252,7 @@ exports.function = function(name, params, mainParam, lineBreak) {
  *
  * @returns {string}
  */
-exports.convert = function(collection) {
+exports.collectionToWikitext = function(collection, noEscape) {
     'use strict';
 
     let wikitext = '';
@@ -156,13 +260,13 @@ exports.convert = function(collection) {
     for (let entry of collection) {
 
         if (typeof entry === 'string') {
-            wikitext += entry + '\n';
+            wikitext += entry + exports.settings.wikitextLinebreak;
         } else if (typeof entry === 'object') {
 
             if (entry.function) {
-                wikitext += exports.function(entry.function, entry.params || {});
+                wikitext += exports.function(entry.function, entry.params, false, true, noEscape);
             } else if (entry.template) {
-                wikitext += exports.template(entry.template, entry.params || {});
+                wikitext += exports.template(entry.template, entry.params, true, noEscape);
             }
         }
     }
@@ -250,8 +354,7 @@ exports.escape = function(wikitext) {
         wikitext = wikitext
             .split('|').join('&#124;')
             .split('[').join('&#91;')
-            .split(']').join('&#93;')
-        ;
+            .split(']').join('&#93;');
     }
     return wikitext;
 };
