@@ -91,6 +91,11 @@ exports.template = function(name, params, lineBreak, noEscape) {
         LB = exports.settings.wikitextLinebreak;
     }
 
+    if (typeof name === 'object' && name.template) {
+        params = name.params || {};
+        name = name.template;
+    }
+
     if (!params || Object.keys(params).length === 0) {
         return '{{' + name + '}}' + LB;
     }
@@ -121,6 +126,11 @@ exports.function = function(name, params, mainParam, lineBreak, noEscape) {
     let LB = '';
     if (lineBreak) {
         LB = exports.settings.wikitextLinebreak;
+    }
+
+    if (typeof name === 'object' && name.function) {
+        params = name.params || {};
+        name = name.function;
     }
 
     if (!params && mainParam) {

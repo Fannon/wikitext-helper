@@ -15,8 +15,8 @@ describe('wikitext helper', function() {
         let result = wikitext.params(obj);
         console.log(result);
         expect(result).to.be.a('string');
-        expect(result).to.include('| param1 |');
-        expect(result).to.include('| param2=param2 value');
+        expect(result).to.include('|param1|');
+        expect(result).to.include('|param2=param2 value');
     });
 
     it('creates multi-line wikitext params', function() {
@@ -27,8 +27,8 @@ describe('wikitext helper', function() {
         let result = wikitext.params(obj, true);
         console.log(result);
         expect(result).to.be.a('string');
-        expect(result).to.include('| param1\n');
-        expect(result).to.include('| param2=param2 value\n');
+        expect(result).to.include('|param1\n');
+        expect(result).to.include('|param2=param2 value\n');
     });
 
     it('handles array as arraymap params', function() {
@@ -52,8 +52,8 @@ describe('wikitext helper', function() {
         console.log(result);
         expect(result).to.be.a('string');
         expect(result).to.include('{{Country\n');
-        expect(result).to.include('| code=en\n');
-        expect(result).to.include('| label_en=England\n');
+        expect(result).to.include('|code=en\n');
+        expect(result).to.include('|label_en=England\n');
     });
 
     it('creates functions', function() {
@@ -65,8 +65,8 @@ describe('wikitext helper', function() {
         console.log(result);
         expect(result).to.be.a('string');
         expect(result).to.include('{{set:|');
-        expect(result).to.include('| test=this');
-        expect(result).to.include('| that');
+        expect(result).to.include('|test=this');
+        expect(result).to.include('|that');
     });
 
 
@@ -94,7 +94,7 @@ describe('wikitext helper', function() {
         console.log(result);
         expect(result).to.be.a('string');
         expect(result).to.include('==Some Header==');
-        expect(result).to.include('| label_en=England\n');
+        expect(result).to.include('|label_en=England\n');
     });
 
 
