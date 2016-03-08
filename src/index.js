@@ -151,7 +151,8 @@ exports.function = function(name, params, mainParam, lineBreak, noEscape) {
  * Does only detect templates and arbitrary wikitext
  * No functions, no nesting!
  *
- * TODO: Rewrite this using a true parser, e.g. https://github.com/pegjs/pegjs
+ * TODO: Rewrite this using a true parser? e.g. https://github.com/pegjs/pegjs
+ * TODO: Handle nested {{, by counting all {{ after {{ and ignore the same amount of }} until the next cut
  *
  * @param wikitext
  * @returns {{}}
