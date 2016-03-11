@@ -219,6 +219,14 @@ exports.wikitextToCollection = function(wikitext) {
                 let paramArray = paramText.split('=');
                 let paramName = paramArray[0].trim();
                 let paramValue = paramArray[1].trim();
+
+                // If the value includes a separerator, make it an array
+                if (paramValue.indexOf(exports.settings.arraymapSeparator) > -1) {
+                    paramValue = paramValue.split(';').map((str) => {
+                        return str.trim();
+                    });
+                }
+
                 el.params[paramName] = paramValue;
                 templateText = templateText.slice(paramStart + 1);
             }
