@@ -164,6 +164,8 @@ exports.wikitextToCollection = function(wikitext) {
 
     while (wikitext.indexOf('{{') > -1) {
 
+        wikitext = wikitext.trim();
+
         let templateStart = wikitext.indexOf('{{');
         let templateEnd = wikitext.indexOf('}}');
 
@@ -183,8 +185,10 @@ exports.wikitextToCollection = function(wikitext) {
     }
 
     if (wikitext.trim() !== '') {
-        collection.push(wikitext);
+        collection.push(wikitext.trim());
     }
+
+
 
     // Analyze Templates
     for (let el of collection) {
@@ -271,7 +275,7 @@ exports.collectionToWikitext = function(collection, noEscape) {
     for (let entry of collection) {
 
         if (typeof entry === 'string') {
-            wikitext += entry + exports.settings.wikitextLinebreak;
+            wikitext += entry;
         } else if (typeof entry === 'object') {
 
             if (entry.function) {
