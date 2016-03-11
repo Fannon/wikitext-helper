@@ -1,6 +1,6 @@
 {
   "name": "wikitext-js",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "A collection of wikitext helper functions, especially datastructure to wikitext",
   "main": "src/index.js",
   "repository": {
