@@ -218,10 +218,13 @@ exports.wikitextToCollection = function(wikitext) {
                 let paramText = templateText.slice(0, paramStart).trim();
                 let paramArray = paramText.split('=');
                 let paramName = paramArray[0].trim();
-                let paramValue = paramArray[1].trim();
+                let paramValue = paramArray[1] || true;
+                if (paramValue.trim) {
+                    paramValue = paramValue.trim();
+                }
 
                 // If the value includes a separerator, make it an array
-                if (paramValue.indexOf(exports.settings.arraymapSeparator) > -1) {
+                if (paramValue.indexOf && paramValue.indexOf(exports.settings.arraymapSeparator) > -1) {
                     paramValue = paramValue.split(';').map((str) => {
                         return str.trim();
                     });
@@ -235,7 +238,10 @@ exports.wikitextToCollection = function(wikitext) {
             let paramText = templateText.trim();
             let paramArray = paramText.split('=');
             let paramName = paramArray[0].trim();
-            let paramValue = paramArray[1].trim();
+            let paramValue = paramArray[1] || true;
+            if (paramValue.trim) {
+                paramValue = paramValue.trim();
+            }
             el.params[paramName] = paramValue;
 
             delete el.text;
