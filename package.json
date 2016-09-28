@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/Fannon/wikitext-js.git"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "grunt": "^0.4.5",
